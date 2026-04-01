@@ -103,98 +103,37 @@ def price_label(price_inr):
 st.markdown("""
 <style>
     .stApp {
-        background-color: #f6f8fc;
+        background: linear-gradient(120deg, #eef2ff, #f8fafc);
+        font-family: 'Segoe UI', sans-serif;
     }
 
     .main-title-box {
         background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        padding: 28px;
+        padding: 30px;
         border-radius: 20px;
         text-align: center;
         color: white;
-        margin-bottom: 22px;
-        box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
     }
 
     .section-card {
         background: white;
         padding: 22px;
         border-radius: 18px;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         margin-bottom: 18px;
     }
 
-    .metric-card {
-        background: white;
-        padding: 18px;
-        border-radius: 16px;
+    .upload-box {
+        border: 2px dashed #c7d2fe;
+        padding: 30px;
+        border-radius: 15px;
         text-align: center;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-    }
-
-    .metric-title {
-        font-size: 16px;
-        color: #555;
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
-
-    .metric-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: #111827;
-    }
-
-    .result-box {
-        background: linear-gradient(135deg, #10b981, #059669);
-        padding: 24px;
-        border-radius: 18px;
-        text-align: center;
-        color: white;
-        margin-top: 22px;
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22);
-    }
-
-    .result-price {
-        font-size: 26px;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
-
-    .result-sub {
-        font-size: 16px;
-        opacity: 0.95;
-    }
-
-    .stButton > button {
-        width: 100%;
-        height: 3.2em;
-        border: none;
-        border-radius: 14px;
-        font-size: 18px;
-        font-weight: 700;
-        color: white;
-        background: linear-gradient(90deg, #4f46e5, #7c3aed);
-        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.25);
-    }
-
-    .stButton > button:hover {
-        color: white;
-        opacity: 0.95;
-    }
-
-    div[data-baseweb="select"] > div {
-        border-radius: 12px !important;
-    }
-
-    .small-note {
-        color: #6b7280;
-        font-size: 14px;
-        margin-top: 6px;
+        background: #f8fafc;
     }
 </style>
 """, unsafe_allow_html=True)
-
 # ---------------- BRAND LIST ---------------- #
 brands = sorted(df["Brand"].dropna().unique().tolist())
 
@@ -219,12 +158,14 @@ if page == "Dashboard":
     avg_ram = df["RAM_GB"].mean()
     avg_storage = df["Storage_GB"].mean()
 
+
+    
     c1, c2, c3, c4 = st.columns(4)
 
     with c1:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-title">Total Mobiles</div>
+            <div class="metric-title">📱 Total Mobiles</div>
             <div class="metric-value">{total}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -232,74 +173,35 @@ if page == "Dashboard":
     with c2:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-title">Average Price</div>
-            <div class="metric-value">€{round(avg_price_eur, 2)}</div>
+            <div class="metric-title">💶 Avg Price</div>
+            <div class="metric-value">€{round(avg_price_eur,2)}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with c3:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-title">Average RAM</div>
-            <div class="metric-value">{round(avg_ram, 2)} GB</div>
+            <div class="metric-title">⚡ Avg RAM</div>
+            <div class="metric-value">{round(avg_ram,1)} GB</div>
         </div>
         """, unsafe_allow_html=True)
 
     with c4:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-title">Average Storage</div>
-            <div class="metric-value">{round(avg_storage, 2)} GB</div>
+            <div class="metric-title">💾 Avg Storage</div>
+            <div class="metric-value">{round(avg_storage,1)} GB</div>
         </div>
         """, unsafe_allow_html=True)
-
-    st.write("")
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.subheader("📊 RAM vs Price")
-        fig1 = px.scatter(
-            df,
-            x="RAM_GB",
-            y="Price_Clean",
-            color="RAM_GB",
-            hover_data=["Brand", "Storage_GB", "Battery_mAh", "Main_Camera_MP"]
-        )
-        fig1.update_layout(
-            xaxis_title="RAM (GB)",
-            yaxis_title="Price (€)",
-            height=420
-        )
-        st.plotly_chart(fig1, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.subheader("💾 Average Price by Storage")
-        avg_storage_df = df.groupby("Storage_GB", as_index=False)["Price_Clean"].mean()
-        fig2 = px.bar(
-            avg_storage_df,
-            x="Storage_GB",
-            y="Price_Clean",
-            text_auto=".0f"
-        )
-        fig2.update_layout(
-            xaxis_title="Storage (GB)",
-            yaxis_title="Average Price (€)",
-            height=420
-        )
-        st.plotly_chart(fig2, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- PREDICTION ---------------- #
 elif page == "Prediction":
     st.markdown("""
-    <div class="main-title-box">
-        <h1 style="margin-bottom:8px;">💰 Mobile Price Prediction</h1>
-        <h3 style="margin-top:0; font-weight:500;">Enter mobile specifications to estimate realistic market price in EURO</h3>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="main-title-box">
+    <h1>💰 Smart Price Prediction</h1>
+    <p>AI-powered estimation based on specifications</p>
+</div>
+""", unsafe_allow_html=True)
 
     left, right = st.columns(2)
 
@@ -421,60 +323,96 @@ elif page == "EDA":
 
 # ---------------- BULK SCANNER ---------------- #
 elif page == "Bulk Scanner":
+
     st.markdown("""
     <div class="main-title-box">
-        <h1 style="margin-bottom:8px;">📂 Bulk Scanner</h1>
-        <h3 style="margin-top:0; font-weight:500;">Upload a CSV file and predict prices for multiple mobiles at once</h3>
+        <h1>🔎 Bulk Premium Scanner</h1>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="section-card">
-        <b>Required columns in uploaded CSV:</b><br>
-        Brand, RAM_GB, Storage_GB, Battery_mAh, Main_Camera_MP
-    </div>
-    """, unsafe_allow_html=True)
+    # STEP 1
+    st.markdown("## 1. Download Sample Templates")
 
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+    sample_df = pd.DataFrame({
+        "Brand": ["Xiaomi", "Samsung"],
+        "RAM_GB": [4, 8],
+        "Storage_GB": [64, 128],
+        "Battery_mAh": [5000, 4500],
+        "Main_Camera_MP": [50, 64]
+    })
+
+    col1, col2, col3 = st.columns(3)
+
+    csv = sample_df.to_csv(index=False).encode("utf-8")
+    col1.download_button("📄 Download CSV Sample", csv, "sample.csv")
+
+    excel_file = "sample.xlsx"
+    sample_df.to_excel(excel_file, index=False)
+    with open(excel_file, "rb") as f:
+        col2.download_button("📊 Download Excel Sample", f, "sample.xlsx")
+
+    json_data = sample_df.to_json(orient="records")
+    col3.download_button("📦 Download JSON Sample", json_data, "sample.json")
+
+    st.markdown("---")
+
+    # STEP 2
+    st.markdown("## 2. Upload File to Scan")
+
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+
+    uploaded_file = st.file_uploader(
+        "Choose a file (CSV, Excel, JSON)",
+        type=["csv", "xlsx", "json"]
+    )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if uploaded_file is not None:
-        bulk_df = pd.read_csv(uploaded_file)
 
-        st.subheader("Preview of Uploaded File")
+        if uploaded_file.name.endswith(".csv"):
+            bulk_df = pd.read_csv(uploaded_file)
+
+        elif uploaded_file.name.endswith(".xlsx"):
+            bulk_df = pd.read_excel(uploaded_file)
+
+        elif uploaded_file.name.endswith(".json"):
+            bulk_df = pd.read_json(uploaded_file)
+
+        else:
+            st.error("Unsupported file format")
+            st.stop()
+
+        st.subheader("Preview")
         st.dataframe(bulk_df.head(), use_container_width=True)
 
         required_cols = ["Brand", "RAM_GB", "Storage_GB", "Battery_mAh", "Main_Camera_MP"]
         missing_cols = [col for col in required_cols if col not in bulk_df.columns]
 
         if missing_cols:
-            st.error(f"Missing required columns: {missing_cols}")
+            st.error(f"Missing columns: {missing_cols}")
         else:
-            if st.button("📊 Predict Bulk Prices"):
+            if st.button("🚀 Run Bulk Prediction"):
+
                 result_df = bulk_df.copy()
 
                 def bulk_predict(row):
                     return predict_price_euro(
-                        brand=row["Brand"],
-                        ram=row["RAM_GB"],
-                        storage=row["Storage_GB"],
-                        battery=row["Battery_mAh"],
-                        camera=row["Main_Camera_MP"]
+                        row["Brand"],
+                        row["RAM_GB"],
+                        row["Storage_GB"],
+                        row["Battery_mAh"],
+                        row["Main_Camera_MP"]
                     )
 
                 result_df["Predicted_Price_EUR"] = result_df.apply(bulk_predict, axis=1)
-                result_df["Price_Category"] = result_df["Predicted_Price_EUR"].apply(price_label)
+                result_df["Price_Category"] = (result_df["Predicted_Price_EUR"] * EUR_TO_INR).apply(price_label)
 
-                st.subheader("Prediction Results")
+                st.subheader("Results")
                 st.dataframe(result_df, use_container_width=True)
 
                 csv = result_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    label="⬇️ Download Results CSV",
-                    data=csv,
-                    file_name="bulk_mobile_predictions.csv",
-                    mime="text/csv"
-                )
-
+                st.download_button("⬇️ Download Results", csv, "bulk_predictions.csv")
 # ---------------- ABOUT ---------------- #
 elif page == "About":
 
@@ -528,14 +466,3 @@ elif page == "About":
             </ul>
         </div>
         """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="section-card">
-        <h3>📊 Project Highlights</h3>
-        <p style="line-height:1.7;">
-        The model uses <b>log transformation</b> for stable predictions and applies 
-        <b>brand-based calibration</b> to align results with real-world pricing trends. 
-        This ensures that the predicted values are both <b>data-driven</b> and <b>market realistic</b>.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
