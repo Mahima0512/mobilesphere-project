@@ -78,22 +78,14 @@ def calibrate_prediction_inr(prediction_inr, brand):
     return prediction_inr
 
 
-def predict_price_inr(brand, ram, storage, battery, camera):
+def predict_price_euro(brand, ram, storage, battery, camera):
     input_data = prepare_input_data(brand, ram, storage, battery, camera)
 
-    # Model predicts log(price in euro)
     prediction_log = model.predict(input_data)[0]
 
-    # Convert back from log to euro
-    prediction_euro = np.exp(prediction_log)
+    prediction_euro = round(np.exp(prediction_log), 2)
 
-    # Convert to INR
-    prediction_inr = prediction_euro * EUR_TO_INR
-
-    # Final calibration
-    prediction_inr = calibrate_prediction_inr(prediction_inr, brand)
-
-    return round(prediction_inr)
+    return prediction_euro
 
 
 def price_label(price_inr):
@@ -241,7 +233,7 @@ if page == "Dashboard":
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-title">Average Price</div>
-            <div class="metric-value">₹{round(avg_price_inr):,}</div>
+            <div class="metric-value">€{round(avg_price_eur, 2)}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -305,7 +297,7 @@ elif page == "Prediction":
     st.markdown("""
     <div class="main-title-box">
         <h1 style="margin-bottom:8px;">💰 Mobile Price Prediction</h1>
-        <h3 style="margin-top:0; font-weight:500;">Enter mobile specifications to estimate realistic market price in INR</h3>
+        <h3 style="margin-top:0; font-weight:500;">Enter mobile specifications to estimate realistic market price in EURO</h3>
     </div>
     """, unsafe_allow_html=True)
 
@@ -335,12 +327,12 @@ elif page == "Prediction":
         st.markdown('</div>', unsafe_allow_html=True)
 
     if st.button("🚀 Predict Price"):
-        predicted_price = predict_price_inr(brand, ram, storage, battery, camera)
-        category = price_label(predicted_price)
+        predicted_price = predict_price_euro(brand, ram, storage, battery, camera)
+        category = price_label(predicted_price * EUR_TO_INR)
 
         st.markdown(f"""
         <div class="result-box">
-            <div class="result-price">Estimated Price: ₹{predicted_price:,}</div>
+            <div class="result-price">Estimated Price: €{predicted_price:.2f}</div>
             <div class="result-sub">{category}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -461,7 +453,7 @@ elif page == "Bulk Scanner":
                 result_df = bulk_df.copy()
 
                 def bulk_predict(row):
-                    return predict_price_inr(
+                    return predict_price_euro(
                         brand=row["Brand"],
                         ram=row["RAM_GB"],
                         storage=row["Storage_GB"],
@@ -469,8 +461,8 @@ elif page == "Bulk Scanner":
                         camera=row["Main_Camera_MP"]
                     )
 
-                result_df["Predicted_Price_INR"] = result_df.apply(bulk_predict, axis=1)
-                result_df["Price_Category"] = result_df["Predicted_Price_INR"].apply(price_label)
+                result_df["Predicted_Price_EUR"] = result_df.apply(bulk_predict, axis=1)
+                result_df["Price_Category"] = result_df["Predicted_Price_EUR"].apply(price_label)
 
                 st.subheader("Prediction Results")
                 st.dataframe(result_df, use_container_width=True)
